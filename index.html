@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Kimia: Asam & Basa</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f8ff;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        
+        .game-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .lab-setup {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 30px;
+        }
+        
+        .beakers {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        
+        .beaker {
+            width: 80px;
+            height: 120px;
+            background-color: #e5e5e5;
+            border: 2px solid #999;
+            border-radius: 0 0 10px 10px;
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+        
+        .beaker:hover {
+            transform: scale(1.05);
+        }
+        
+        .beaker-liquid {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 70%;
+            transition: background-color 0.5s;
+        }
+        
+        .beaker::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 10px;
+            background-color: #999;
+            border-radius: 5px 5px 0 0;
+        }
+        
+        .beaker-label {
+            position: absolute;
+            bottom: -25px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .indicators {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .indicator {
+            width: 40px;
+            height: 70px;
+            background-color: #fff;
+            border: 2px solid #777;
+            border-radius: 5px;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .indicator:hover {
+            transform: scale(1.1);
+        }
+        
+        .indicator::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background-color: #ddd;
+            border-radius: 0 0 3px 3px;
+        }
+        
+        .indicator-label {
+            position: absolute;
+            bottom: -25px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 12px;
+        }
+        
+        .game-controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .score-board {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+            min-height: 20px;
+        }
+        
+        .correct {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .ph-scale {
+            width: 100%;
+            height: 40px;
+            margin: 20px 0;
+            background: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
+            border-radius: 5px;
+            position: relative;
+        }
+        
+        .ph-marker {
+            position: absolute;
+            top: -15px;
+            width: 15px;
+            height: 15px;
+            background-color: black;
+            border-radius: 50%;
+            transform: translateX(-50%);
+            transition: left 0.3s;
+        }
+        
+        .ph-values {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 5px;
+        }
+        
+        .ph-description {
+            text-align: center;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        
+        .modal-content {
+            background-color: #fff;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 500px;
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: black;
+        }
+        
+        .instruction-btn {
+            background-color: #28a745;
+        }
+        
+        .instruction-btn:hover {
+            background-color: #218838;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #f2f2f2;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .info-section {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+        }
+        
+        .level-indicator {
+            text-align: center;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Game Kimia: Asam & Basa</h1>
+        
+        <div class="level-indicator">Level: <span id="level">1</span></div>
+        
+        <div class="game-area">
+            <div class="ph-scale">
+                <div class="ph-marker" id="ph-marker"></div>
+            </div>
+            <div class="ph-values">
+                <span>0</span>
+                <span>1</span>
+                <span>2</span>
+                <span>3</span>
+                <span>4</span>
+                <span>5</span>
+                <span>6</span>
+                <span>7</span>
+                <span>8</span>
+                <span>9</span>
+                <span>10</span>
+                <span>11</span>
+                <span>12</span>
+                <span>13</span>
+                <span>14</span>
+            </div>
+            <div class="ph-description" id="ph-description">Netral (pH 7)</div>
+            
+            <div class="beakers" id="beakers">
+                <!-- Beakers will be generated dynamically -->
+            </div>
+            
+            <div class="indicators" id="indicators">
+                <div class="indicator" data-indicator="lakmus-merah">
+                    <div class="indicator-label">Lakmus Merah</div>
+                </div>
+                <div class="indicator" data-indicator="lakmus-biru">
+                    <div class="indicator-label">Lakmus Biru</div>
+                </div>
+                <div class="indicator" data-indicator="fenolftalein">
+                    <div class="indicator-label">Fenolftalein</div>
+                </div>
+                <div class="indicator" data-indicator="metil-orange">
+                    <div class="indicator-label">Metil Orange</div>
+                </div>
+            </div>
+            
+            <div class="message" id="message"></div>
+            
+            <div class="game-controls">
+                <button id="check-btn">Periksa Jawaban</button>
+                <button id="next-level-btn" style="display: none;">Level Berikutnya</button>
+                <button id="instruction-btn" class="instruction-btn">Petunjuk</button>
+            </div>
+            
+            <div class="score-board">
+                Skor: <span id="score">0</span>
+            </div>
+        </div>
+        
+        <div class="info-section">
+            <h3>Informasi Indikator:</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Indikator</th>
+                            <th>Perubahan Warna di Asam</th>
+                            <th>Perubahan Warna di Basa</th>
+                            <th>Rentang pH</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Lakmus Merah</td>
+                            <td>Tetap Merah</td>
+                            <td>Berubah Biru</td>
+                            <td>4.5 - 8.3</td>
+                        </tr>
+                        <tr>
+                            <td>Lakmus Biru</td>
+                            <td>Berubah Merah</td>
+                            <td>Tetap Biru</td>
+                            <td>4.5 - 8.3</td>
+                        </tr>
+                        <tr>
+                            <td>Fenolftalein</td>
+                            <td>Tidak Berwarna</td>
+                            <td>Merah Muda</td>
+                            <td>8.3 - 10.0</td>
+                        </tr>
+                        <tr>
+                            <td>Metil Orange</td>
+                            <td>Merah</td>
+                            <td>Kuning</td>
+                            <td>3.1 - 4.4</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for Instructions -->
+    <div id="instructions-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="close-instructions">&times;</span>
+            <h2>Petunjuk Bermain</h2>
+            <p>Selamat datang di Game Kimia Asam & Basa!</p>
+            <ol>
+                <li>Pada setiap level, Anda akan disajikan beberapa larutan dengan nilai pH berbeda.</li>
+                <li>Pilih salah satu gelas kimia (beaker) yang ingin Anda identifikasi.</li>
+                <li>Pilih indikator yang sesuai untuk mengidentifikasi sifat larutan (asam, basa, atau netral).</li>
+                <li>Klik tombol "Periksa Jawaban" untuk mengecek hasil identifikasi Anda.</li>
+                <li>Jawaban benar akan menambah skor Anda.</li>
+                <li>Lanjutkan ke level berikutnya untuk menghadapi tantangan yang lebih sulit.</li>
+            </ol>
+            <h3>Pengetahuan dasar:</h3>
+            <ul>
+                <li>pH < 7: Asam</li>
+                <li>pH = 7: Netral</li>
+                <li>pH > 7: Basa</li>
+            </ul>
+            <p>Gunakan tabel indikator untuk menentukan indikator mana yang paling tepat untuk larutan yang Anda pilih!</p>
+        </div>
+    </div>
+    
+    <script>
+        // Game state variables
+        let currentLevel = 1;
+        let score = 0;
+        let selectedBeaker = null;
+        let selectedIndicator = null;
+        let beakers = [];
+        
+        // DOM Elements
+        const beakersContainer = document.getElementById('beakers');
+        const indicators = document.querySelectorAll('.indicator');
+        const checkBtn = document.getElementById('check-btn');
+        const nextLevelBtn = document.getElementById('next-level-btn');
+        const instructionBtn = document.getElementById('instruction-btn');
+        const messageEl = document.getElementById('message');
+        const scoreEl = document.getElementById('score');
+        const levelEl = document.getElementById('level');
+        const phMarker = document.getElementById('ph-marker');
+        const phDescription = document.getElementById('ph-description');
+        const instructionsModal = document.getElementById('instructions-modal');
+        const closeInstructions = document.getElementById('close-instructions');
+        
+        // Create compounds database
+        const compounds = [
+            { name: "HCl", fullName: "Asam Klorida", ph: 1, type: "asam kuat" },
+            { name: "H₂SO₄", fullName: "Asam Sulfat", ph: 1.5, type: "asam kuat" },
+            { name: "HNO₃", fullName: "Asam Nitrat", ph: 2, type: "asam kuat" },
+            { name: "CH₃COOH", fullName: "Asam Asetat", ph: 3, type: "asam lemah" },
+            { name: "H₃PO₄", fullName: "Asam Fosfat", ph: 3.5, type: "asam lemah" },
+            { name: "H₂CO₃", fullName: "Asam Karbonat", ph: 4.5, type: "asam lemah" },
+            { name: "H₂O Murni", fullName: "Air Murni", ph: 7, type: "netral" },
+            { name: "NaHCO₃", fullName: "Natrium Bikarbonat", ph: 8, type: "basa lemah" },
+            { name: "NH₃", fullName: "Amonia", ph: 9, type: "basa lemah" },
+            { name: "Na₂CO₃", fullName: "Natrium Karbonat", ph: 10, type: "basa lemah" },
+            { name: "Ca(OH)₂", fullName: "Kalsium Hidroksida", ph: 11, type: "basa kuat" },
+            { name: "KOH", fullName: "Kalium Hidroksida", ph: 12, type: "basa kuat" },
+            { name: "NaOH", fullName: "Natrium Hidroksida", ph: 13, type: "basa kuat" }
+        ];
+        
+        // Create indicator database
+        const indicatorData = {
+            "lakmus-merah": {
+                name: "Lakmus Merah",
+                acidColor: "red",
+                baseColor: "blue",
+                phRange: [4.5, 8.3]
+            },
+            "lakmus-biru": {
+                name: "Lakmus Biru",
+                acidColor: "red",
+                baseColor: "blue",
+                phRange: [4.5, 8.3]
+            },
+            "fenolftalein": {
+                name: "Fenolftalein",
+                acidColor: "transparent",
+                baseColor: "pink",
+                phRange: [8.3, 10.0]
+            },
+            "metil-orange": {
+                name: "Metil Orange",
+                acidColor: "red",
+                baseColor: "yellow",
+                phRange: [3.1, 4.4]
+            }
+        };
+        
+        // Initialize the game
+        function initGame() {
+            resetSelections();
+            loadLevel(currentLevel);
+            addEventListeners();
+            
+            // Show instructions modal initially
+            instructionsModal.style.display = "block";
+            
+            // Update score display
+            updateScore();
+        }
+        
+        // Load level based on the current level number
+        function loadLevel(level) {
+            // Clear beakers
+            beakersContainer.innerHTML = '';
+            beakers = [];
+            
+            // Update level display
+            levelEl.textContent = level;
+            
+            // Generate beakers based on level
+            const numBeakers = Math.min(3 + level, 6);
+            
+            // Select random compounds for the beakers
+            const shuffledCompounds = shuffleArray([...compounds]);
+            const levelCompounds = shuffledCompounds.slice(0, numBeakers);
+            
+            // Create beakers
+            levelCompounds.forEach((compound, index) => {
+                const beaker = createBeaker(compound, index);
+                beakersContainer.appendChild(beaker);
+                beakers.push({
+                    element: beaker,
+                    compound: compound
+                });
+            });
+            
+            // Hide next level button and clear message
+            nextLevelBtn.style.display = 'none';
+            messageEl.className = 'message';
+            messageEl.textContent = '';
+        }
+        
+        // Create a beaker element
+        function createBeaker(compound, index) {
+            const beaker = document.createElement('div');
+            beaker.className = 'beaker';
+            beaker.dataset.index = index;
+            
+            const liquid = document.createElement('div');
+            liquid.className = 'beaker-liquid';
+            liquid.style.backgroundColor = getColorFromPH(compound.ph);
+            
+            const label = document.createElement('div');
+            label.className = 'beaker-label';
+            label.textContent = compound.name;
+            
+            beaker.appendChild(liquid);
+            beaker.appendChild(label);
+            
+            beaker.addEventListener('click', () => selectBeaker(index));
+            
+            return beaker;
+        }
+        
+        // Get color based on pH value
+        function getColorFromPH(ph) {
+            if (ph < 3) return '#e41a1c'; // Strong acid - bright red
+            if (ph < 7) return '#ff7f00'; // Acid - orange
+            if (ph === 7) return '#4daf4a'; // Neutral - green
+            if (ph < 11) return '#377eb8'; // Base - blue
+            return '#984ea3'; // Strong base - purple
+        }
+        
+        // Select a beaker
+        function selectBeaker(index) {
+            // Deselect all beakers first
+            beakers.forEach(beaker => {
+                beaker.element.style.border = '2px solid #999';
+            });
+            
+            // Select the clicked beaker
+            selectedBeaker = index;
+            beakers[index].element.style.border = '3px solid #2c3e50';
+            
+            // Update pH marker and description
+            const ph = beakers[index].compound.ph;
+            updatePhMarker(ph);
+        }
+        
+        // Update pH marker position and description
+        function updatePhMarker(ph) {
+            const percent = (ph / 14) * 100;
+            phMarker.style.left = `${percent}%`;
+            
+            let description;
+            let compoundType;
+            
+            if (ph < 7) {
+                description = `Asam (pH ${ph})`;
+                compoundType = ph < 3 ? "Asam Kuat" : "Asam Lemah";
+            } else if (ph > 7) {
+                description = `Basa (pH ${ph})`;
+                compoundType = ph > 11 ? "Basa Kuat" : "Basa Lemah";
+            } else {
+                description = `Netral (pH ${ph})`;
+                compoundType = "Netral";
+            }
+            
+            phDescription.textContent = description;
+        }
+        
+        // Add all event listeners
+        function addEventListeners() {
+            // Indicator selection
+            indicators.forEach(indicator => {
+                indicator.addEventListener('click', () => {
+                    // Deselect all indicators first
+                    indicators.forEach(ind => {
+                        ind.style.border = '2px solid #777';
+                    });
+                    
+                    // Select the clicked indicator
+                    selectedIndicator = indicator.dataset.indicator;
+                    indicator.style.border = '3px solid #2c3e50';
+                });
+            });
+            
+            // Check button
+            checkBtn.addEventListener('click', checkAnswer);
+            
+            // Next level button
+            nextLevelBtn.addEventListener('click', nextLevel);
+            
+            // Instruction button
+            instructionBtn.addEventListener('click', () => {
+                instructionsModal.style.display = "block";
+            });
+            
+            // Close instructions
+            closeInstructions.addEventListener('click', () => {
+                instructionsModal.style.display = "none";
+            });
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', (event) => {
+                if (event.target === instructionsModal) {
+                    instructionsModal.style.display = "none";
+                }
+            });
+        }
+        
+        // Check if the selected indicator is appropriate for the selected beaker
+        function checkAnswer() {
+            // Check if both beaker and indicator are selected
+            if (selectedBeaker === null || selectedIndicator === null) {
+                messageEl.className = 'message incorrect';
+                messageEl.textContent = 'Pilih larutan dan indikator terlebih dahulu!';
+                return;
+            }
+            
+            const beaker = beakers[selectedBeaker];
+            const ph = beaker.compound.ph;
+            const indicator = indicatorData[selectedIndicator];
+            
+            // Determine if the chosen indicator is appropriate
+            let isCorrect = false;
+            let resultMessage = '';
+            
+            if (selectedIndicator === 'lakmus-merah') {
+                if (ph > 8.3) {
+                    isCorrect = true;
+                    resultMessage = `Benar! Lakmus merah berubah menjadi biru dalam larutan basa ${beaker.compound.fullName} (pH ${ph}).`;
+                } else if (ph < 4.5) {
+                    isCorrect = true;
+                    resultMessage = `Benar! Lakmus merah tetap merah dalam larutan asam ${beaker.compound.fullName} (pH ${ph}).`;
+                } else {
+                    resultMessage = `Kurang tepat. Lakmus merah tidak menunjukkan perubahan yang jelas pada pH ${ph}.`;
+                }
+            } else if (selectedIndicator === 'lakmus-biru') {
+                if (ph < 4.5) {
+                    isCorrect = true;
+                    resultMessage = `Benar! Lakmus biru berubah menjadi merah dalam larutan asam ${beaker.compound.fullName} (pH ${ph}).`;
+                } else if (ph > 8.3) {
+                    isCorrect = true;
+                    resultMessage = `Benar! Lakmus biru tetap biru dalam larutan basa ${beaker.compound.fullName} (pH ${ph}).`;
+                } else {
+                    resultMessage = `Kurang tepat. Lakmus biru tidak menunjukkan perubahan yang jelas pada pH ${ph}.`;
+                }
+            } else if (selectedIndicator === 'fenolftalein') {
+                if (ph > 8.3) {
+                    isCorrect = true;
+                    resultMessage = `Benar! Fenolftalein berubah menjadi merah muda dalam larutan basa ${beaker.compound.fullName} (pH ${ph}).`;
+                } else {
+                    resultMessage = `Kurang tepat. Fenolftalein tidak berwarna pada pH ${ph}.`;
+                }
+            } else if (selectedIndicator === 'metil-orange') {
+                if (ph < 3.1) {
+                    isCorrect = true;
+                    resultMessage = `Benar! Metil orange berubah menjadi merah dalam larutan asam kuat ${beaker.compound.fullName} (pH ${ph}).`;
+                } else if (ph > 4.4) {
+                    isCorrect = true;
+                    resultMessage = `Benar! Metil orange berubah menjadi kuning dalam larutan ${beaker.compound.fullName} (pH ${ph}).`;
+                } else {
+                    resultMessage = `Kurang tepat. Metil orange menunjukkan warna campuran pada pH ${ph}.`;
+                }
+            }
+            
+            // Update message and score
+            messageEl.className = isCorrect ? 'message correct' : 'message incorrect';
+            messageEl.textContent = resultMessage;
+            
+            if (isCorrect) {
+                score += 10 * currentLevel;
+                updateScore();
+                nextLevelBtn.style.display = 'inline-block';
+                checkBtn.style.display = 'none';
+            }
+        }
+        
+        // Go to next level
+        function nextLevel() {
+            currentLevel++;
+            resetSelections();
+            loadLevel(currentLevel);
+            checkBtn.style.display = 'inline-block';
+        }
+        
+        // Reset selections
+        function resetSelections() {
+            selectedBeaker = null;
+            selectedIndicator = null;
+            
+            // Reset indicator borders
+            indicators.forEach(indicator => {
+                indicator.style.border = '2px solid #777';
+            });
+        }
+        
+        // Update score display
+        function updateScore() {
+            scoreEl.textContent = score;
+        }
+        
+        // Helper function to shuffle array
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+        
+        // Initialize the game when the page loads
+        window.onload = initGame;
+    </script>
+</body>
+</html>
